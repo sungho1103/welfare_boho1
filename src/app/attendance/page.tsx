@@ -37,9 +37,11 @@ export default function AttendancePage() {
     })
   }
 
-  // 메인탭 기준 이용자 필터
+  // 메인탭 기준 이용자 필터 (전체일 때 근로인 → 훈련인 순)
   const tabUsers = mainTab === '전체'
-    ? mockUsers
+    ? [...mockUsers].sort((a, b) =>
+        a.worker_type === b.worker_type ? 0 : a.worker_type === '근로인' ? -1 : 1
+      )
     : mockUsers.filter(u => u.worker_type === mainTab)
 
   // 서브탭 필터
