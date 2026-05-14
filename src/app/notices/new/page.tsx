@@ -1,22 +1,20 @@
 'use client'
 
 import { useState } from 'react'
-import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import type { NoticeType } from '@/lib/types'
 
 const noticeTypes: { value: NoticeType; label: string; icon: string }[] = [
-  { value: 'urgent',     label: '긴급 공지', icon: '🚨' },
-  { value: 'general',    label: '일반 공지', icon: '📢' },
+  { value: 'urgent',     label: '긴급 공지',    icon: '🚨' },
+  { value: 'general',    label: '일반 공지',    icon: '📢' },
   { value: 'program',    label: '프로그램 안내', icon: '⭐' },
-  { value: 'schedule',   label: '일정·행사', icon: '📅' },
-  { value: 'homecoming', label: '귀가 안내', icon: '🏠' },
-  { value: 'salary',     label: '급여 안내', icon: '💰' },
+  { value: 'schedule',   label: '일정·행사',    icon: '📅' },
+  { value: 'homecoming', label: '귀가 안내',    icon: '🏠' },
+  { value: 'salary',     label: '급여 안내',    icon: '💰' },
 ]
 
 export default function NewNoticePage() {
   const router = useRouter()
-  const supabase = createClient()
   const [type, setType] = useState<NoticeType>('general')
   const [title, setTitle] = useState('')
   const [body, setBody] = useState('')
@@ -28,29 +26,24 @@ export default function NewNoticePage() {
   const [homecomingTime, setHomecomingTime] = useState('')
   const [hasVehicle, setHasVehicle] = useState(false)
   const [needsPickup, setNeedsPickup] = useState(false)
-  const [sending, setSending] = useState(false)
 
   function addSupply() { setSupplies([...supplies, '']) }
-  function updateSupply(i: number, v: string) {
-    const next = [...supplies]; next[i] = v; setSupplies(next)
-  }
+  function updateSupply(i: number, v: string) { const n=[...supplies]; n[i]=v; setSupplies(n) }
   function removeSupply(i: number) { setSupplies(supplies.filter((_,idx)=>idx!==i)) }
 
   function buildPreview() {
-    const typeMap: Record<NoticeType, string> = {
+    const typeMap: Record<NoticeType,string> = {
       urgent:'긴급공지', general:'공지', program:'프로그램 안내',
       schedule:'일정 안내', homecoming:'귀가 안내', salary:'급여 안내'
     }
-    let msg = `[${typeMap[type]}] ${title}\n\n안녕하세요. ○○보호작업장입니다.\n`
+    let msg = `[${typeMap[type]}] ${title || '제목 없음'}\n\n안녕하세요. ○○보호작업장입니다.\n`
     if (body) msg += `\n${body}\n`
     if (type === 'program') {
       if (programDate) msg += `\n📅 날짜: ${programDate}`
       if (timeStart && timeEnd) msg += `\n🕙 시간: ${timeStart} ~ ${timeEnd}`
       if (location) msg += `\n📍 장소: ${location}`
-      const validSupplies = supplies.filter(s=>s.trim())
-      if (validSupplies.length > 0) {
-        msg += `\n\n🎒 준비물\n` + validSupplies.map(s=>`· ${s}`).join('\n')
-      }
+      const valid = supplies.filter(s=>s.trim())
+      if (valid.length > 0) msg += `\n\n🎒 준비물\n` + valid.map(s=>`· ${s}`).join('\n')
     }
     if (type === 'program' || type === 'homecoming') {
       if (homecomingTime) msg += `\n\n🚌 귀가 안내\n· 퇴근 시간: ${homecomingTime}`
@@ -60,26 +53,10 @@ export default function NewNoticePage() {
     return msg
   }
 
-  async function handleSubmit() {
+  function handleSubmit() {
     if (!title.trim()) return alert('제목을 입력해주세요')
-    setSending(true)
-    const { error } = await supabase.from('notices').insert({
-      type, title, body,
-      program_date: programDate || null,
-      program_time_start: timeStart || null,
-      program_time_end: timeEnd || null,
-      program_location: location || null,
-      supplies: supplies.filter(s=>s.trim()),
-      homecoming_time: homecomingTime || null,
-      has_vehicle: hasVehicle,
-      needs_guardian_pickup: needsPickup,
-      target_type: 'all',
-      send_method: 'sms',
-      sent_count: 0,
-    })
-    setSending(false)
-    if (!error) router.push('/notices')
-    else alert('저장 중 오류가 발생했습니다')
+    alert('발송됐습니다! (Supabase 연결 후 실제 발송됩니다)')
+    router.push('/notices')
   }
 
   return (
@@ -126,18 +103,18 @@ export default function NewNoticePage() {
                   </div>
                   <div className="flex-1">
                     <label className="text-xs text-gray-400 block mb-1">장소</label>
-                    <input value={location} onChange={e=>setLocation(e.target.value)} placeholder="장소 입력"
+                    <input value={location} onChange={e=>setLocation(e.target.value)} placeholder="장소"
                       className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" />
                   </div>
                 </div>
                 <div className="flex gap-3">
                   <div className="flex-1">
-                    <label className="text-xs text-gray-400 block mb-1">시작 시간</label>
+                    <label className="text-xs text-gray-400 block mb-1">시작</label>
                     <input type="time" value={timeStart} onChange={e=>setTimeStart(e.target.value)}
                       className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" />
                   </div>
                   <div className="flex-1">
-                    <label className="text-xs text-gray-400 block mb-1">종료 시간</label>
+                    <label className="text-xs text-gray-400 block mb-1">종료</label>
                     <input type="time" value={timeEnd} onChange={e=>setTimeEnd(e.target.value)}
                       className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm" />
                   </div>
@@ -146,7 +123,7 @@ export default function NewNoticePage() {
             </div>
             <div className="border-t border-gray-50 pt-4">
               <div className="text-xs font-medium text-gray-500 mb-3">🎒 준비물</div>
-              {supplies.map((s, i) => (
+              {supplies.map((s,i) => (
                 <div key={i} className="flex gap-2 mb-2">
                   <input value={s} onChange={e=>updateSupply(i,e.target.value)} placeholder={`준비물 ${i+1}`}
                     className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm" />
@@ -181,14 +158,14 @@ export default function NewNoticePage() {
       </div>
 
       <div className="bg-gray-50 rounded-xl border border-gray-100 p-4 mb-5">
-        <div className="text-xs text-gray-400 mb-2 flex items-center gap-1">👁 발송 미리보기</div>
+        <div className="text-xs text-gray-400 mb-2">👁 발송 미리보기</div>
         <pre className="text-xs text-gray-600 whitespace-pre-wrap leading-relaxed">{buildPreview()}</pre>
       </div>
 
       <div className="flex gap-3">
-        <button onClick={handleSubmit} disabled={sending}
-          className="flex-1 bg-blue-600 text-white py-3 rounded-xl text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors">
-          {sending ? '발송 중...' : '전체 발송 (27명)'}
+        <button onClick={handleSubmit}
+          className="flex-1 bg-blue-600 text-white py-3 rounded-xl text-sm font-medium hover:bg-blue-700 transition-colors">
+          전체 발송 (27명)
         </button>
         <button onClick={()=>router.back()}
           className="px-6 border border-gray-200 text-gray-600 text-sm rounded-xl hover:bg-gray-50">
