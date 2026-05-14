@@ -1,14 +1,14 @@
 import type { User, Attendance, DailyLog, Notice } from './types'
 
 export const mockUsers: User[] = [
-  { id:'1', name:'강민준', code:'2021-001', group_name:'A반', guardian_name:'강부모', guardian_phone:'010-1234-5678', staff_id:'s1', status:'active', created_at:'' },
-  { id:'2', name:'박소연', code:'2021-002', group_name:'A반', guardian_name:'박부모', guardian_phone:'010-2345-6789', staff_id:'s1', status:'active', created_at:'' },
-  { id:'3', name:'최지훈', code:'2021-003', group_name:'B반', guardian_name:'최부모', guardian_phone:'010-3456-7890', staff_id:'s1', status:'active', created_at:'' },
-  { id:'4', name:'이수아', code:'2021-004', group_name:'B반', guardian_name:'이부모', guardian_phone:'010-4567-8901', staff_id:'s1', status:'active', created_at:'' },
-  { id:'5', name:'정우성', code:'2021-005', group_name:'A반', guardian_name:'정부모', guardian_phone:'010-5678-9012', staff_id:'s1', status:'active', created_at:'' },
-  { id:'6', name:'김하은', code:'2021-006', group_name:'B반', guardian_name:'김부모', guardian_phone:'010-6789-0123', staff_id:'s1', status:'active', created_at:'' },
-  { id:'7', name:'윤도현', code:'2021-007', group_name:'A반', guardian_name:'윤부모', guardian_phone:'010-7890-1234', staff_id:'s1', status:'active', created_at:'' },
-  { id:'8', name:'오세린', code:'2021-008', group_name:'B반', guardian_name:'오부모', guardian_phone:'010-8901-2345', staff_id:'s1', status:'active', created_at:'' },
+  { id:'1', name:'강민준', code:'2021-001', group_name:'A반', worker_type:'근로인', guardian_name:'강부모', guardian_phone:'010-1234-5678', staff_id:'s1', status:'active', created_at:'' },
+  { id:'2', name:'박소연', code:'2021-002', group_name:'A반', worker_type:'근로인', guardian_name:'박부모', guardian_phone:'010-2345-6789', staff_id:'s1', status:'active', created_at:'' },
+  { id:'3', name:'최지훈', code:'2021-003', group_name:'B반', worker_type:'훈련인', guardian_name:'최부모', guardian_phone:'010-3456-7890', staff_id:'s1', status:'active', created_at:'' },
+  { id:'4', name:'이수아', code:'2021-004', group_name:'B반', worker_type:'훈련인', guardian_name:'이부모', guardian_phone:'010-4567-8901', staff_id:'s1', status:'active', created_at:'' },
+  { id:'5', name:'정우성', code:'2021-005', group_name:'A반', worker_type:'근로인', guardian_name:'정부모', guardian_phone:'010-5678-9012', staff_id:'s1', status:'active', created_at:'' },
+  { id:'6', name:'김하은', code:'2021-006', group_name:'B반', worker_type:'근로인', guardian_name:'김부모', guardian_phone:'010-6789-0123', staff_id:'s1', status:'active', created_at:'' },
+  { id:'7', name:'윤도현', code:'2021-007', group_name:'A반', worker_type:'훈련인', guardian_name:'윤부모', guardian_phone:'010-7890-1234', staff_id:'s1', status:'active', created_at:'' },
+  { id:'8', name:'오세린', code:'2021-008', group_name:'B반', worker_type:'훈련인', guardian_name:'오부모', guardian_phone:'010-8901-2345', staff_id:'s1', status:'active', created_at:'' },
 ]
 
 const today = new Date().toISOString().split('T')[0]

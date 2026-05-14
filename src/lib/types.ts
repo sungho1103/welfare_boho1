@@ -2,6 +2,7 @@ export type AttendanceStatus = 'present' | 'absent' | 'late' | 'early_leave'
 export type NoticeType = 'general' | 'urgent' | 'program' | 'schedule' | 'homecoming' | 'salary'
 export type NotificationStatus = 'pending' | 'sent' | 'failed'
 export type UserStatus = 'active' | 'inactive' | 'leave'
+export type WorkerType = '근로인' | '훈련인'
 
 export interface Staff {
   id: string
@@ -17,6 +18,7 @@ export interface User {
   name: string
   code: string
   group_name: string
+  worker_type: WorkerType
   guardian_name: string
   guardian_phone: string
   guardian_phone2?: string
