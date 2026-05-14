@@ -4,11 +4,12 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
 const navItems = [
-  { href: '/',             icon: '🏠', label: '대시보드' },
-  { href: '/attendance',   icon: '✅', label: '출결 관리' },
-  { href: '/logs',         icon: '📋', label: '활동 일지' },
-  { href: '/notices',      icon: '📣', label: '보호자 알림' },
-  { href: '/users',        icon: '👥', label: '이용자 관리' },
+  { href: '/',           icon: '🏠', label: '대시보드' },
+  { href: '/attendance', icon: '✅', label: '출결 관리' },
+  { href: '/reports',    icon: '📊', label: '출결 보고' },
+  { href: '/logs',       icon: '📋', label: '활동 일지' },
+  { href: '/notices',    icon: '📣', label: '보호자 알림' },
+  { href: '/users',      icon: '👥', label: '이용자 관리' },
 ]
 
 export default function Sidebar() {
@@ -24,15 +25,12 @@ export default function Sidebar() {
         {navItems.map((item) => {
           const isActive = pathname === item.href
           return (
-            <Link
-              key={item.href}
-              href={item.href}
+            <Link key={item.href} href={item.href}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
                 isActive
                   ? 'bg-blue-50 text-blue-700 font-medium'
                   : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-              }`}
-            >
+              }`}>
               <span className="text-base">{item.icon}</span>
               {item.label}
             </Link>
