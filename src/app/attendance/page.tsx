@@ -13,11 +13,11 @@ const statusColor: Record<string, string> = {
   late:'bg-amber-100 text-amber-800',
 }
 
-type MainTab = '근로인' | '훈련인'
+type MainTab = '전체' | '근로인' | '훈련인'
 type SubTab = '전체' | '출석' | '결석' | '지각' | '미확인'
 
 export default function AttendancePage() {
-  const [mainTab, setMainTab] = useState<MainTab>('근로인')
+  const [mainTab, setMainTab] = useState<MainTab>('전체')
   const [subTab, setSubTab] = useState<SubTab>('전체')
   const [attendances, setAttendances] = useState<Attendance[]>(mockAttendances)
   const [date, setDate] = useState(new Date().toISOString().split('T')[0])
@@ -37,11 +37,13 @@ export default function AttendancePage() {
     })
   }
 
-  // 근로인/훈련인 필터된 이용자
-  const groupUsers = mockUsers.filter(u => u.worker_type === mainTab)
+  // 메인탭 기준 이용자 필터
+  const tabUsers = mainTab === '전체'
+    ? mockUsers
+    : mockUsers.filter(u => u.worker_type === mainTab)
 
   // 서브탭 필터
-  const filtered = groupUsers.filter(u => {
+  const filtered = tabUsers.filter(u => {
     const a = getAtt(u.id)
     if (subTab === '전체')   return true
     if (subTab === '출석')   return a?.status === 'present'
@@ -51,24 +53,29 @@ export default function AttendancePage() {
     return true
   })
 
-  // 서브탭 카운트
-  function getCounts(wType: WorkerType) {
-    const users = mockUsers.filter(u => u.worker_type === wType)
-    const atts  = users.map(u => getAtt(u.id))
+  // 서브탭 카운트 (현재 메인탭 기준)
+  const counts = {
+    전체:   tabUsers.length,
+    출석:   tabUsers.filter(u => getAtt(u.id)?.status === 'present').length,
+    결석:   tabUsers.filter(u => getAtt(u.id)?.status === 'absent').length,
+    지각:   tabUsers.filter(u => getAtt(u.id)?.status === 'late').length,
+    미확인: tabUsers.filter(u => !getAtt(u.id)).length,
+  }
+
+  // 메인탭 배지용 카운트
+  function getMainCounts(wt: '전체' | WorkerType) {
+    const users = wt === '전체' ? mockUsers : mockUsers.filter(u => u.worker_type === wt)
     return {
-      전체:   users.length,
-      출석:   atts.filter(a => a?.status === 'present').length,
-      결석:   atts.filter(a => a?.status === 'absent').length,
-      지각:   atts.filter(a => a?.status === 'late').length,
-      미확인: users.filter(u => !getAtt(u.id)).length,
+      present: users.filter(u => getAtt(u.id)?.status === 'present').length,
+      total: users.length,
     }
   }
 
-  const counts = getCounts(mainTab)
-
-  // 메인탭 요약 (근로인/훈련인 각각 출석 수)
-  const workerCounts  = getCounts('근로인')
-  const traineeCounts = getCounts('훈련인')
+  const mainTabConfig = [
+    { key: '전체'  as MainTab, label: '전체',   color: 'blue'   },
+    { key: '근로인' as MainTab, label: '근로인', color: 'blue'   },
+    { key: '훈련인' as MainTab, label: '훈련인', color: 'violet' },
+  ]
 
   return (
     <div className="max-w-3xl mx-auto">
@@ -78,38 +85,38 @@ export default function AttendancePage() {
           className="text-sm border border-gray-200 rounded-lg px-3 py-1.5 text-gray-700" />
       </div>
 
-      {/* 메인탭: 근로인 / 훈련인 */}
-      <div className="flex gap-3 mb-4">
-        {(['근로인', '훈련인'] as MainTab[]).map(t => {
-          const c = t === '근로인' ? workerCounts : traineeCounts
-          const isActive = mainTab === t
+      {/* 메인탭: 전체 / 근로인 / 훈련인 */}
+      <div className="flex gap-2 mb-4">
+        {mainTabConfig.map(({ key, label, color }) => {
+          const c = getMainCounts(key === '전체' ? '전체' : key as WorkerType)
+          const isActive = mainTab === key
+          const activeClass = key === '훈련인'
+            ? 'bg-violet-600 text-white border-violet-600'
+            : 'bg-blue-600 text-white border-blue-600'
           return (
-            <button key={t} onClick={() => { setMainTab(t); setSubTab('전체') }}
+            <button key={key}
+              onClick={() => { setMainTab(key); setSubTab('전체') }}
               className={`flex-1 py-3 rounded-xl border text-sm font-medium transition-colors ${
-                isActive
-                  ? t === '근로인'
-                    ? 'bg-blue-600 text-white border-blue-600'
-                    : 'bg-violet-600 text-white border-violet-600'
-                  : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
+                isActive ? activeClass : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
               }`}>
-              <div className="text-base font-semibold">{t}</div>
+              <div className="text-base font-semibold">{label}</div>
               <div className={`text-xs mt-0.5 ${isActive ? 'text-white/80' : 'text-gray-400'}`}>
-                출석 {c.출석} / 전체 {c.전체}
+                출석 {c.present} / 전체 {c.total}
               </div>
             </button>
           )
         })}
       </div>
 
-      {/* 서브탭: 전체/출석/결석/지각/미확인 */}
+      {/* 서브탭 */}
       <div className="flex border-b border-gray-100 mb-4">
         {(['전체','출석','결석','지각','미확인'] as SubTab[]).map(t => (
           <button key={t} onClick={() => setSubTab(t)}
             className={`px-4 py-2.5 text-sm border-b-2 transition-colors ${
               subTab === t
-                ? mainTab === '근로인'
-                  ? 'border-blue-500 text-blue-600 font-medium'
-                  : 'border-violet-500 text-violet-600 font-medium'
+                ? mainTab === '훈련인'
+                  ? 'border-violet-500 text-violet-600 font-medium'
+                  : 'border-blue-500 text-blue-600 font-medium'
                 : 'border-transparent text-gray-500 hover:text-gray-700'
             }`}>
             {t} {counts[t]}
@@ -133,9 +140,12 @@ export default function AttendancePage() {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-medium text-gray-900">{u.name}</span>
-                  <span className={`text-xs px-1.5 py-0.5 rounded text-white ${
-                    u.worker_type === '근로인' ? 'bg-blue-500' : 'bg-violet-500'
-                  }`}>{u.worker_type}</span>
+                  {/* 전체 탭일 때만 배지 표시 */}
+                  {mainTab === '전체' && (
+                    <span className={`text-xs px-1.5 py-0.5 rounded text-white ${
+                      u.worker_type === '근로인' ? 'bg-blue-500' : 'bg-violet-500'
+                    }`}>{u.worker_type}</span>
+                  )}
                 </div>
                 <div className="text-xs text-gray-400">
                   {a?.check_in_time
